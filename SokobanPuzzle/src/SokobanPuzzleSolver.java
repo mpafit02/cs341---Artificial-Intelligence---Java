@@ -3,18 +3,11 @@ import java.util.ArrayList;
 import java.util.PriorityQueue;
 import java.util.Scanner;
 
-/*
- * https://www.callicoder.com/java-priority-queue/
- * 
- * Frontier,
- * Close list, states already created
- * 
- */
 public class SokobanPuzzleSolver {
-	public static char[][] loadPuzzle(String filename) {
+	public static Character[][] loadPuzzle(String filename) {
 		File file = new File(filename);
 		Scanner sc = null;
-		char puzzle[][] = null;
+		Character puzzle[][] = null;
 		try {
 			sc = new Scanner(file);
 			String str = sc.nextLine();
@@ -35,7 +28,7 @@ public class SokobanPuzzleSolver {
 				}
 			}
 
-			puzzle = new char[N][max];
+			puzzle = new Character[N][max];
 			for (int i = 0; i < lines.length; i++) {
 				for (int j = 0; j < lines[i].length(); j++) {
 					puzzle[i][j] = lines[i].charAt(j);
@@ -47,8 +40,6 @@ public class SokobanPuzzleSolver {
 		}
 		return puzzle;
 	}
-
-	
 
 	public static ArrayList<Integer[]> blockedPositions(char[][] puzzle) {
 		ArrayList<Integer[]> blockedPositions = new ArrayList<>();
@@ -66,35 +57,66 @@ public class SokobanPuzzleSolver {
 		return blockedPositions;
 	}
 
-	public static void main(String[] args) {
-		String filenames[] = { ".\\puzzles\\sokoban_7a.txt" };
-		for (String filename : filenames) {
-			char puzzle[][] = loadPuzzle(filename);
-
-			State root = new State('-', puzzle, null);
-
-			System.out.println("-root");
-			System.out.println(root.toString());
-
-			root.CreateChildren();
-			for (int i = 0; i < root.children.size(); i++) {
-				System.out.println("-" + i);
-				System.out.println(root.children.get(i).toString());
-				root.children.get(i).CreateChildren();
-				for (int j = 0; j < root.children.get(i).children.size(); j++) {
-					System.out.println("---" + j);
-					System.out.println(root.children.get(i).children.get(j).toString());
+	public static ArrayList<Character> AStarSolver(PriorityQueue<State> frontier, ArrayList<Character[][]> visited) {
+		if (frontier.isEmpty()) {
+			return null;
+		}
+		// Get the head of the queue
+		State parent = frontier.poll();
+		if (parent.isSolved()) {
+			return parent.path;
+		}
+		visited.add(parent.puzzle);
+		parent.CreateChildren();
+		boolean isVisited = false;
+		for (int i = 0; i < parent.children.size(); i++) {
+			isVisited = false;
+			State child = parent.children.get(i);
+			for (Character[][] v_puzzle : visited) {
+				if (isSame(v_puzzle, child.puzzle)) {
+					isVisited = true;
+					break;
 				}
-				System.out.println();
 			}
+			if (!isVisited) {
+				frontier.add(child);
+			}
+		}
+		return AStarSolver(frontier, visited);
+	}
 
+	public static boolean isSame(Character[][] puzzle1, Character[][] puzzle2) {
+		for (int i = 0; i < puzzle1.length; i++) {
+			for (int j = 0; j < puzzle1[0].length; j++) {
+				if (puzzle1[i][j] != puzzle2[i][j]) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	public static void main(String[] args) {
+		long maxBytes = Runtime.getRuntime().maxMemory();
+		System.out.println("Max memory: " + maxBytes / 1024 / 1024 + " MB");
+		String filenames[] = { ".\\puzzles\\SOK_EASY1.txt", ".\\puzzles\\SOK_EASY2.txt", ".\\puzzles\\SOK_EASY3.txt",
+				".\\puzzles\\SOK_MED1.txt", ".\\puzzles\\SOK_HARD1.txt" };
+		ArrayList<Character[][]> puzzles = new ArrayList<>();
+		for (String filename : filenames) {
+			puzzles.add(loadPuzzle(filename));
+		}
+		for (Character[][] puzzle : puzzles) {
 			// Create a PriorityQueue
 			PriorityQueue<State> frontier = new PriorityQueue<>();
-//			ArrayList<Integer[]> blockedPositions = blockedPositions(puzzle);
-//			System.out.println("Blocked postiions:");
-//			for (int i = 0; i < blockedPositions.size(); i++) {
-//				System.out.println("[" + blockedPositions.get(i)[0] + ", " + blockedPositions.get(i)[1] + "]");
-//			}
+			ArrayList<Character[][]> visited = new ArrayList<>();
+			frontier.add(new State(' ', puzzle, null));
+
+			ArrayList<Character> path = AStarSolver(frontier, visited);
+			for (int i = 0; i < path.size(); i++) {
+				System.out.print(path.get(i));
+			}
+			System.out.println();
+			// System.out.println(path);
 		}
 	}
 

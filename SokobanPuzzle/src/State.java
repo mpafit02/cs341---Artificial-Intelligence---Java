@@ -3,19 +3,19 @@ import java.util.ArrayList;
 public class State implements Comparable<State> {
 	ArrayList<State> children;
 	ArrayList<Character> path;
-	char[][] puzzle;
+	Character[][] puzzle;
 	State parent;
 	char move;
 	int dist;
 	int steps;
 
-	public State(char move, char[][] puzzle, State parent) {
+	public State(char move, Character[][] puzzle, State parent) {
 		this.children = new ArrayList<>();
 		this.parent = parent;
 		this.move = move;
 		this.path = new ArrayList<Character>();
 		this.steps = 0;
-		this.puzzle = new char[puzzle.length][puzzle[0].length];
+		this.puzzle = new Character[puzzle.length][puzzle[0].length];
 		if (parent != null) {
 			for (int i = 0; i < parent.path.size(); i++) {
 				this.path.add(parent.path.get(i));
@@ -28,26 +28,29 @@ public class State implements Comparable<State> {
 				this.puzzle[i][j] = puzzle[i][j];
 			}
 		}
-		this.dist = GetDist();
+		//this.dist = getDist1(puzzle);
+		this.dist = getDist2(puzzle);
 	}
 
-	private int GetDist() {
+	private int getDist1(Character[][] puzzle) {
 		int dist = this.steps;
 		ArrayList<Integer[]> box = new ArrayList<>();
 		ArrayList<Integer[]> target = new ArrayList<>();
 		Integer[] pos = new Integer[2];
 		for (int i = 0; i < puzzle.length; i++) {
-			for (int j = 0; j < this.puzzle[0].length; j++) {
-				if (this.puzzle[i][j] == '$') {
-					pos[0] = i;
-					pos[1] = j;
-					box.add(pos);
-					pos = new Integer[2];
-				} else if (this.puzzle[i][j] == '.') {
-					pos[0] = i;
-					pos[1] = j;
-					target.add(pos);
-					pos = new Integer[2];
+			for (int j = 0; j < puzzle[0].length; j++) {
+				if (puzzle[i][j] != null) {
+					if (puzzle[i][j] == '$') {
+						pos[0] = i;
+						pos[1] = j;
+						box.add(pos);
+						pos = new Integer[2];
+					} else if (puzzle[i][j] == '.') {
+						pos[0] = i;
+						pos[1] = j;
+						target.add(pos);
+						pos = new Integer[2];
+					}
 				}
 			}
 		}
@@ -59,14 +62,31 @@ public class State implements Comparable<State> {
 		return dist;
 	}
 
-	public boolean isDeadlock(char[][] puzzle) {
+	private int getDist2(Character[][] puzzle) {
+		int dist = this.steps;
+		int missplaced = 0;
+		for (int i = 0; i < puzzle.length; i++) {
+			for (int j = 0; j < puzzle[0].length; j++) {
+				if (puzzle[i][j] != null && puzzle[i][j] == '$') {
+					missplaced++;
+				}
+			}
+		}
+		dist += missplaced;
+		return dist;
+	}
+
+	public boolean isDeadlock(Character[][] puzzle) {
 		for (int i = 1; i < puzzle.length - 1; i++) {
 			for (int j = 1; j < puzzle[0].length - 1; j++) {
-				if ((puzzle[i][j] == '$' && puzzle[i][j - 1] == '#' && puzzle[i - 1][j] == '#')
-						|| (puzzle[i][j] == '$' && puzzle[i][j - 1] == '#' && puzzle[i + 1][j] == '#')
-						|| (puzzle[i][j] == '$' && puzzle[i][j + 1] == '#' && puzzle[i - 1][j] == '#')
-						|| (puzzle[i][j] == '$' && puzzle[i][j + 1] == '#' && puzzle[i + 1][j] == '#')) {
-					return true;
+				if (puzzle[i][j] != null && puzzle[i][j - 1] != null && puzzle[i][j - 1] != null
+						&& puzzle[i - 1][j] != null && puzzle[i + 1][j] != null) {
+					if ((puzzle[i][j] == '$' && puzzle[i][j - 1] == '#' && puzzle[i - 1][j] == '#')
+							|| (puzzle[i][j] == '$' && puzzle[i][j - 1] == '#' && puzzle[i + 1][j] == '#')
+							|| (puzzle[i][j] == '$' && puzzle[i][j + 1] == '#' && puzzle[i - 1][j] == '#')
+							|| (puzzle[i][j] == '$' && puzzle[i][j + 1] == '#' && puzzle[i + 1][j] == '#')) {
+						return true;
+					}
 				}
 			}
 		}
@@ -79,56 +99,60 @@ public class State implements Comparable<State> {
 			int x = player[0];
 			int y = player[1];
 			// Left
-			if ((puzzle[x][y - 1] == '$' || this.puzzle[x][y - 1] == '*') && (puzzle[x][y - 2] != '#')) {
-				char[][] puzzle_l = copyArray(puzzle);
+			if ((puzzle[x][y - 1] == '$' || this.puzzle[x][y - 1] == '*')
+					&& (puzzle[x][y - 2] != '#' && puzzle[x][y - 2] != '$' && puzzle[x][y - 2] != '*')) {
+				Character[][] puzzle_l = copyArray(puzzle);
 				pushBox(x, y, x, y - 1, x, y - 2, puzzle_l);
 				if (!isDeadlock(puzzle_l)) {
 					this.children.add(new State('L', puzzle_l, this));
 				}
 			} else if (puzzle[x][y - 1] == ' ' || puzzle[x][y - 1] == '.') {
-				char[][] puzzle_l = copyArray(puzzle);
+				Character[][] puzzle_l = copyArray(puzzle);
 				movePlayer(x, y, x, y - 1, puzzle_l);
 				if (!isDeadlock(puzzle_l)) {
 					this.children.add(new State('l', puzzle_l, this));
 				}
 			}
 			// Right
-			if ((puzzle[x][y + 1] == '$' || this.puzzle[x][y + 1] == '*') && (puzzle[x][y + 2] != '#')) {
-				char[][] puzzle_r = copyArray(puzzle);
+			if ((puzzle[x][y + 1] == '$' || this.puzzle[x][y + 1] == '*')
+					&& (puzzle[x][y + 2] != '#' && puzzle[x][y + 2] != '$' && puzzle[x][y + 2] != '*')) {
+				Character[][] puzzle_r = copyArray(puzzle);
 				pushBox(x, y, x, y + 1, x, y + 2, puzzle_r);
 				if (!isDeadlock(puzzle_r)) {
 					this.children.add(new State('R', puzzle_r, this));
 				}
 			} else if (puzzle[x][y + 1] == ' ' || puzzle[x][y + 1] == '.') {
-				char[][] puzzle_r = copyArray(puzzle);
+				Character[][] puzzle_r = copyArray(puzzle);
 				movePlayer(x, y, x, y + 1, puzzle_r);
 				if (!isDeadlock(puzzle_r)) {
 					this.children.add(new State('r', puzzle_r, this));
 				}
 			}
 			// Up
-			if ((puzzle[x - 1][y] == '$' || this.puzzle[x - 1][y] == '*') && (puzzle[x - 2][y] != '#')) {
-				char[][] puzzle_u = copyArray(puzzle);
+			if ((puzzle[x - 1][y] == '$' || this.puzzle[x - 1][y] == '*')
+					&& (puzzle[x - 2][y] != '#' && puzzle[x - 2][y] != '$' && puzzle[x - 2][y] != '*')) {
+				Character[][] puzzle_u = copyArray(puzzle);
 				pushBox(x, y, x - 1, y, x - 2, y, puzzle_u);
 				if (!isDeadlock(puzzle_u)) {
 					this.children.add(new State('U', puzzle_u, this));
 				}
 			} else if (puzzle[x - 1][y] == ' ' || puzzle[x - 1][y] == '.') {
-				char[][] puzzle_u = copyArray(puzzle);
+				Character[][] puzzle_u = copyArray(puzzle);
 				movePlayer(x, y, x - 1, y, puzzle_u);
 				if (!isDeadlock(puzzle_u)) {
 					this.children.add(new State('u', puzzle_u, this));
 				}
 			}
 			// Down
-			if ((puzzle[x + 1][y] == '$' || this.puzzle[x + 1][y] == '*') && (puzzle[x + 2][y] != '#')) {
-				char[][] puzzle_d = copyArray(puzzle);
+			if ((this.puzzle[x + 1][y] == '$' || this.puzzle[x + 1][y] == '*')
+					&& (this.puzzle[x + 2][y] != '#' && this.puzzle[x + 2][y] != '$' && this.puzzle[x + 2][y] != '*')) {
+				Character[][] puzzle_d = copyArray(puzzle);
 				pushBox(x, y, x + 1, y, x + 2, y, puzzle_d);
 				if (!isDeadlock(puzzle_d)) {
 					this.children.add(new State('D', puzzle_d, this));
 				}
 			} else if (puzzle[x + 1][y] == ' ' || puzzle[x + 1][y] == '.') {
-				char[][] puzzle_d = copyArray(puzzle);
+				Character[][] puzzle_d = copyArray(puzzle);
 				movePlayer(x, y, x + 1, y, puzzle_d);
 				if (!isDeadlock(puzzle_d)) {
 					this.children.add(new State('d', puzzle_d, this));
@@ -137,7 +161,7 @@ public class State implements Comparable<State> {
 		}
 	}
 
-	private void pushBox(int old_x, int old_y, int new_x, int new_y, int box_x, int box_y, char[][] puzzle) {
+	private void pushBox(int old_x, int old_y, int new_x, int new_y, int box_x, int box_y, Character[][] puzzle) {
 		if (puzzle[old_x][old_y] == '+') {
 			puzzle[old_x][old_y] = '.';
 		} else if (puzzle[old_x][old_y] == '@') {
@@ -155,7 +179,7 @@ public class State implements Comparable<State> {
 		}
 	}
 
-	private void movePlayer(int old_x, int old_y, int new_x, int new_y, char[][] puzzle) {
+	private void movePlayer(int old_x, int old_y, int new_x, int new_y, Character[][] puzzle) {
 		if (puzzle[old_x][old_y] == '+') {
 			puzzle[old_x][old_y] = '.';
 		} else if (puzzle[old_x][old_y] == '@') {
@@ -168,8 +192,8 @@ public class State implements Comparable<State> {
 		}
 	}
 
-	private char[][] copyArray(char[][] puzzle) {
-		char[][] puzzle_new = new char[puzzle.length][puzzle[0].length];
+	private Character[][] copyArray(Character[][] puzzle) {
+		Character[][] puzzle_new = new Character[puzzle.length][puzzle[0].length];
 		for (int i = 0; i < puzzle.length; i++) {
 			for (int j = 0; j < puzzle[0].length; j++) {
 				puzzle_new[i][j] = puzzle[i][j];
@@ -182,16 +206,29 @@ public class State implements Comparable<State> {
 		int position[] = new int[2];
 		for (int i = 0; i < this.puzzle.length; i++) {
 			for (int j = 0; j < this.puzzle[0].length; j++) {
-				if (this.puzzle[i][j] == '@' || this.puzzle[i][j] == '+') {
-					position[0] = i;
-					position[1] = j;
+				if (this.puzzle[i][j] != null) {
+					if (this.puzzle[i][j] == '@' || this.puzzle[i][j] == '+') {
+						position[0] = i;
+						position[1] = j;
+					}
 				}
 			}
 		}
 		return position;
 	}
 
-	private String printPuzzle(char[][] puzzle) {
+	public boolean isSolved() {
+		for (int i = 0; i < this.puzzle.length; i++) {
+			for (int j = 0; j < this.puzzle[0].length; j++) {
+				if (this.puzzle[i][j] != null && this.puzzle[i][j] == '$') {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	private String printPuzzle(Character[][] puzzle) {
 		String output = "";
 		for (int i = 0; i < puzzle.length; i++) {
 			output += "\t";
