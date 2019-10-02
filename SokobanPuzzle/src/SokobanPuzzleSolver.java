@@ -63,18 +63,6 @@ public class SokobanPuzzleSolver {
 		}
 	}
 
-	public static int[] playersPosition(char[][] puzzle) {
-		int position[] = new int[2];
-		for (int i = 0; i < puzzle.length; i++) {
-			for (int j = 0; j < puzzle[0].length; j++) {
-				if (puzzle[i][j] == '@' || puzzle[i][j] == '+') {
-					position[0] = i;
-					position[1] = j;
-				}
-			}
-		}
-		return position;
-	}
 
 	public static ArrayList<Integer[]> blockedPositions(char[][] puzzle) {
 		ArrayList<Integer[]> blockedPositions = new ArrayList<>();
@@ -97,9 +85,7 @@ public class SokobanPuzzleSolver {
 		for (String filename : filenames) {
 			char puzzle[][] = loadPuzzle(filename);
 			printPuzzle(puzzle);
-			int player[] = playersPosition(puzzle);
 			ArrayList<Integer[]> blockedPositions = blockedPositions(puzzle);
-			System.out.println("Player: [" + player[0] + ", " + player[1] + "]");
 			System.out.println("Blocked postiions:");
 			for (int i = 0; i < blockedPositions.size(); i++) {
 				System.out.println("[" + blockedPositions.get(i)[0] + ", " + blockedPositions.get(i)[1] + "]");
