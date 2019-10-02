@@ -1,11 +1,13 @@
 import java.io.File;
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 import java.util.Scanner;
 
 /*
  * https://www.callicoder.com/java-priority-queue/
  * 
- * Use priority queue for the frontier (implement compareTo in the State object)
+ * Frontier,
+ * Close list, states already created
  * 
  */
 public class SokobanPuzzleSolver {
@@ -46,14 +48,7 @@ public class SokobanPuzzleSolver {
 		return puzzle;
 	}
 
-	public static void printPuzzle(char[][] puzzle) {
-		for (int i = 0; i < puzzle.length; i++) {
-			for (int j = 0; j < puzzle[0].length; j++) {
-				System.out.print(puzzle[i][j]);
-			}
-			System.out.println();
-		}
-	}
+	
 
 	public static ArrayList<Integer[]> blockedPositions(char[][] puzzle) {
 		ArrayList<Integer[]> blockedPositions = new ArrayList<>();
@@ -78,20 +73,23 @@ public class SokobanPuzzleSolver {
 
 			State root = new State('-', puzzle, null);
 
-			printPuzzle(root.puzzle);
+			System.out.println("-root");
+			System.out.println(root.toString());
 
 			root.CreateChildren();
 			for (int i = 0; i < root.children.size(); i++) {
 				System.out.println("-" + i);
-				printPuzzle(root.children.get(i).puzzle);
+				System.out.println(root.children.get(i).toString());
 				root.children.get(i).CreateChildren();
 				for (int j = 0; j < root.children.get(i).children.size(); j++) {
 					System.out.println("---" + j);
-					printPuzzle(root.children.get(i).children.get(j).puzzle);
+					System.out.println(root.children.get(i).children.get(j).toString());
 				}
 				System.out.println();
 			}
-//			printPuzzle(puzzle);
+
+			// Create a PriorityQueue
+			PriorityQueue<State> frontier = new PriorityQueue<>();
 //			ArrayList<Integer[]> blockedPositions = blockedPositions(puzzle);
 //			System.out.println("Blocked postiions:");
 //			for (int i = 0; i < blockedPositions.size(); i++) {

@@ -191,6 +191,26 @@ public class State implements Comparable<State> {
 		return position;
 	}
 
+	private String printPuzzle(char[][] puzzle) {
+		String output = "";
+		for (int i = 0; i < puzzle.length; i++) {
+			output += "\t";
+			for (int j = 0; j < puzzle[0].length; j++) {
+				output += puzzle[i][j];
+			}
+			output += "\n";
+		}
+		return output;
+	}
+
+	@Override
+	public String toString() {
+		String output = "State {\nChildren : " + children.size() + ",\nPath: " + path.toString() + ",\nMove: " + move
+				+ ",\nDistance: " + dist + ",\nSteps: " + steps + ",\nPuzzle: \n";
+		output += printPuzzle(this.puzzle) + "}\n";
+		return output;
+	}
+
 	@Override
 	public int compareTo(State state) {
 		if (this.dist > state.dist) {
