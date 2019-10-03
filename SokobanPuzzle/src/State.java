@@ -1,5 +1,21 @@
 import java.util.ArrayList;
 
+/**
+ * The state represents a state of the Sokoban Puzzle. It contains a list of
+ * state's children and its parent. It stores the path that had followed in an
+ * array list and the move that it made. Also, it keeps the number of steps that
+ * have been made to reach the specific state. It has the puzzle represented as
+ * a two dimensional array of characters. Finally it calculates the distance
+ * until the goal state which it is been calculated with two different methods.
+ * Those two heuristics affect a lot the performance of the A* algorithm. The
+ * first heuristic (getDist1) is the number of steps already made plus the
+ * Manhattan distance between an unplaced box and a target spot. The second
+ * heuristic (getDist2) is the number of steps already made plus the number of
+ * misplaced boxes.
+ * 
+ * @author Marios
+ *
+ */
 public class State implements Comparable<State> {
 	ArrayList<State> children;
 	ArrayList<Character> path;
@@ -9,6 +25,15 @@ public class State implements Comparable<State> {
 	int dist;
 	int steps;
 
+	/**
+	 * This is the constructor for the creation of a new state. Uncomment the
+	 * this.dist = getDist2(puzzle) to try the second heuristic. The first heuristic
+	 * performs better than the second one.
+	 * 
+	 * @param move
+	 * @param puzzle
+	 * @param parent
+	 */
 	public State(char move, Character[][] puzzle, State parent) {
 		this.children = new ArrayList<>();
 		this.parent = parent;
@@ -28,10 +53,19 @@ public class State implements Comparable<State> {
 				this.puzzle[i][j] = puzzle[i][j];
 			}
 		}
-		//this.dist = getDist1(puzzle);
-		this.dist = getDist2(puzzle);
+		this.dist = getDist1(puzzle);
+		// this.dist = getDist2(puzzle);
 	}
 
+	/**
+	 * This method calculates the possible moves until the goal state from the
+	 * current state. This heuristic is the number of the steps covered already by
+	 * the player plus the Manhattan distance between a misplaced box and a target
+	 * spot.
+	 * 
+	 * @param puzzle
+	 * @return
+	 */
 	private int getDist1(Character[][] puzzle) {
 		int dist = this.steps;
 		ArrayList<Integer[]> box = new ArrayList<>();
@@ -62,6 +96,15 @@ public class State implements Comparable<State> {
 		return dist;
 	}
 
+	/**
+	 * 
+	 * This method calculates the possible moves until the goal state from the
+	 * current state. This heuristic is the number of the steps covered already by
+	 * the player plus the number of misplaced boxes.
+	 * 
+	 * @param puzzle
+	 * @return
+	 */
 	private int getDist2(Character[][] puzzle) {
 		int dist = this.steps;
 		int missplaced = 0;
@@ -76,6 +119,15 @@ public class State implements Comparable<State> {
 		return dist;
 	}
 
+	/**
+	 * This method checks whether a puzzle is in deadlock. If we have the situation
+	 * that a box is placed in a corner then we have a deadlock. Also, if two boxes
+	 * are next to each other and there is a wall behind them then this case is a
+	 * deadlock too.
+	 * 
+	 * @param puzzle
+	 * @return true if it is in a deadlock
+	 */
 	public boolean isDeadlock(Character[][] puzzle) {
 		for (int i = 1; i < puzzle.length - 1; i++) {
 			for (int j = 1; j < puzzle[0].length - 1; j++) {
@@ -87,13 +139,27 @@ public class State implements Comparable<State> {
 							|| (puzzle[i][j] == '$' && puzzle[i][j + 1] == '#' && puzzle[i + 1][j] == '#')) {
 						return true;
 					}
+					if ((puzzle[i][j] == '$' && puzzle[i][j - 1] == '#' && puzzle[i - 1][j] == '$'
+							&& puzzle[i - 1][j - 1] == '#')
+							|| (puzzle[i][j] == '$' && puzzle[i][j - 1] == '$' && puzzle[i - 1][j] == '#'
+									&& puzzle[i - 1][j - 1] == '#')
+							|| (puzzle[i][j] == '$' && puzzle[i][j - 1] == '#' && puzzle[i + 1][j] == '$'
+									&& puzzle[i + 1][j - 1] == '#')
+							|| (puzzle[i][j] == '$' && puzzle[i][j - 1] == '$' && puzzle[i + 1][j] == '#'
+									&& puzzle[i + 1][j - 1] == '#')) {
+						return true;
+					}
 				}
 			}
 		}
 		return false;
 	}
 
-	public void CreateChildren() {
+	/**
+	 * This method creates all the children of the current state. Before adding a
+	 * child in the children list it checks wether we have a deadlock or not.
+	 */
+	public void createChildren() {
 		if (this.children.isEmpty()) {
 			int[] player = playersPosition();
 			int x = player[0];
@@ -144,8 +210,8 @@ public class State implements Comparable<State> {
 				}
 			}
 			// Down
-			if ((this.puzzle[x + 1][y] == '$' || this.puzzle[x + 1][y] == '*')
-					&& (this.puzzle[x + 2][y] != '#' && this.puzzle[x + 2][y] != '$' && this.puzzle[x + 2][y] != '*')) {
+			if ((puzzle[x + 1][y] == '$' || puzzle[x + 1][y] == '*')
+					&& (puzzle[x + 2][y] != '#' && puzzle[x + 2][y] != '$' && puzzle[x + 2][y] != '*')) {
 				Character[][] puzzle_d = copyArray(puzzle);
 				pushBox(x, y, x + 1, y, x + 2, y, puzzle_d);
 				if (!isDeadlock(puzzle_d)) {
@@ -161,6 +227,17 @@ public class State implements Comparable<State> {
 		}
 	}
 
+	/**
+	 * Method to push a box and move the player too.
+	 * 
+	 * @param old_x
+	 * @param old_y
+	 * @param new_x
+	 * @param new_y
+	 * @param box_x
+	 * @param box_y
+	 * @param puzzle
+	 */
 	private void pushBox(int old_x, int old_y, int new_x, int new_y, int box_x, int box_y, Character[][] puzzle) {
 		if (puzzle[old_x][old_y] == '+') {
 			puzzle[old_x][old_y] = '.';
@@ -179,6 +256,15 @@ public class State implements Comparable<State> {
 		}
 	}
 
+	/**
+	 * Method to move the player to a new position.
+	 * 
+	 * @param old_x
+	 * @param old_y
+	 * @param new_x
+	 * @param new_y
+	 * @param puzzle
+	 */
 	private void movePlayer(int old_x, int old_y, int new_x, int new_y, Character[][] puzzle) {
 		if (puzzle[old_x][old_y] == '+') {
 			puzzle[old_x][old_y] = '.';
@@ -192,6 +278,13 @@ public class State implements Comparable<State> {
 		}
 	}
 
+	/**
+	 * This method creates a new array, copies the one that took as argument and
+	 * then returns the instance of the new array.
+	 * 
+	 * @param puzzle
+	 * @return
+	 */
 	private Character[][] copyArray(Character[][] puzzle) {
 		Character[][] puzzle_new = new Character[puzzle.length][puzzle[0].length];
 		for (int i = 0; i < puzzle.length; i++) {
@@ -202,6 +295,11 @@ public class State implements Comparable<State> {
 		return puzzle_new;
 	}
 
+	/**
+	 * Returns the players position.
+	 * 
+	 * @return two element array wich is the x and y of the player in the puzzle.
+	 */
 	public int[] playersPosition() {
 		int position[] = new int[2];
 		for (int i = 0; i < this.puzzle.length; i++) {
@@ -217,6 +315,11 @@ public class State implements Comparable<State> {
 		return position;
 	}
 
+	/**
+	 * Checks if a puzzle is solved.
+	 * 
+	 * @return
+	 */
 	public boolean isSolved() {
 		for (int i = 0; i < this.puzzle.length; i++) {
 			for (int j = 0; j < this.puzzle[0].length; j++) {
@@ -228,6 +331,12 @@ public class State implements Comparable<State> {
 		return true;
 	}
 
+	/**
+	 * Returns a string with the puzzle ready for printing.
+	 * 
+	 * @param puzzle
+	 * @return
+	 */
 	private String printPuzzle(Character[][] puzzle) {
 		String output = "";
 		for (int i = 0; i < puzzle.length; i++) {

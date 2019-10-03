@@ -1,15 +1,33 @@
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.PriorityQueue;
 import java.util.Scanner;
 
+/**
+ * This is a testing main class for the A* Sokoban puzzle solver.
+ * 
+ * @author Marios
+ *
+ */
 public class SokobanPuzzleSolver {
-	public static Character[][] loadPuzzle(String filename) {
-		File file = new File(filename);
-		Scanner sc = null;
+	private static Scanner scan;
+
+	/**
+	 * This method loads a puzzle from a file. It takes as input a filename. It
+	 * opens the file and reads the first character which is the number of rows for
+	 * the Sokoban puzzle. It reads two per two the puzzle and stores the output in
+	 * a two dimensional character array. The space ' ' represents an empty spot in
+	 * the puzzle. The character '@' represents the position of the player. The '.'
+	 * represents a target spot for a box. The '$' represents a box. The '#'
+	 * represents a wall. The '*' represents a box placed on a target spot. The '+'
+	 * represents the player standing on a target spot.
+	 * 
+	 * @param filename
+	 * @return
+	 */
+	public static Character[][] loadPuzzle(Scanner sc) {
 		Character puzzle[][] = null;
 		try {
-			sc = new Scanner(file);
 			String str = sc.nextLine();
 
 			int N = Integer.parseInt(str, 10);
@@ -41,83 +59,149 @@ public class SokobanPuzzleSolver {
 		return puzzle;
 	}
 
-	public static ArrayList<Integer[]> blockedPositions(char[][] puzzle) {
-		ArrayList<Integer[]> blockedPositions = new ArrayList<>();
-		Integer[] pos = new Integer[2];
+	/**
+	 * This method prints the puzzle/
+	 * 
+	 * @param puzzle
+	 */
+	public static void printPuzzle(Character[][] puzzle) {
 		for (int i = 0; i < puzzle.length; i++) {
-			for (int j = 0; j < puzzle[i].length; j++) {
-				if (puzzle[i][j] == '#') {
-					pos[0] = i;
-					pos[1] = j;
-					blockedPositions.add(pos);
-					pos = new Integer[2];
+			System.out.print("\t");
+			for (int j = 0; j < puzzle[0].length; j++) {
+				if (puzzle[i][j] != null) {
+					System.out.print(puzzle[i][j]);
 				}
 			}
+			System.out.println();
 		}
-		return blockedPositions;
 	}
 
-	public static ArrayList<Character> AStarSolver(PriorityQueue<State> frontier, ArrayList<Character[][]> visited) {
-		if (frontier.isEmpty()) {
-			return null;
-		}
-		// Get the head of the queue
-		State parent = frontier.poll();
-		if (parent.isSolved()) {
-			return parent.path;
-		}
-		visited.add(parent.puzzle);
-		parent.CreateChildren();
-		boolean isVisited = false;
-		for (int i = 0; i < parent.children.size(); i++) {
-			isVisited = false;
-			State child = parent.children.get(i);
-			for (Character[][] v_puzzle : visited) {
-				if (isSame(v_puzzle, child.puzzle)) {
-					isVisited = true;
-					break;
-				}
-			}
-			if (!isVisited) {
-				frontier.add(child);
+	/**
+	 * Run this method if you wan to see some examples of this solution.
+	 */
+	public static void autoTesting() {
+		// Sokoban filenames
+		String filenames[] = { ".\\puzzles\\SOK_EASY1.txt", ".\\puzzles\\SOK_EASY2.txt", ".\\puzzles\\SOK_EASY3.txt",
+				".\\puzzles\\SOK_EASY4.txt", ".\\puzzles\\SOK_EASY5.txt", ".\\puzzles\\SOK_MED1.txt",
+				".\\puzzles\\SOK_MED2.txt", ".\\puzzles\\SOK_MED3.txt", ".\\puzzles\\SOK_MED4.txt",
+				".\\puzzles\\SOK_HARD1.txt", ".\\puzzles\\SOK_HARD2.txt", ".\\puzzles\\SOK_HARD3.txt",
+				".\\puzzles\\SOK_HARD4.txt", ".\\puzzles\\SOK_HARD5.txt", ".\\puzzles\\SOK_UNSOLVABLE1.txt" };
+		ArrayList<Character[][]> puzzles = new ArrayList<>();
+		// Load the puzzles from the files
+		for (String filename : filenames) {
+			try {
+				File file = new File(filename);
+				Scanner sc = new Scanner(file);
+				puzzles.add(loadPuzzle(sc));
+			} catch (FileNotFoundException e) {
+				System.out.println("Wrong input files.");
+				System.exit(0);
 			}
 		}
-		return AStarSolver(frontier, visited);
-	}
+		// Solve the puzzles
+		for (Character[][] puzzle : puzzles) {
+			System.out.println("Input Puzzle: ");
+			printPuzzle(puzzle);
+			System.out.println();
 
-	public static boolean isSame(Character[][] puzzle1, Character[][] puzzle2) {
-		for (int i = 0; i < puzzle1.length; i++) {
-			for (int j = 0; j < puzzle1[0].length; j++) {
-				if (puzzle1[i][j] != puzzle2[i][j]) {
-					return false;
+			// Create an A* solver object.
+			AStarSokobanSolver solution = new AStarSokobanSolver(puzzle);
+
+			long start_time = System.currentTimeMillis();
+			solution.solve();
+			long end_time = System.currentTimeMillis();
+
+			if (solution.getPath() == null) {
+				System.out.println("No solution found");
+			} else {
+				System.out.println("Steps: ");
+				for (int i = 0; i <= solution.getPath().size(); i++) {
+					if (i == solution.getPath().size()) {
+						System.out.println(">GOAL");
+					} else {
+						char c = solution.getPath().get(i);
+						if (c == 'r' || c == 'R') {
+							System.out.println(">RIGHT");
+						} else if (c == 'l' || c == 'L') {
+							System.out.println(">LEFT");
+						} else if (c == 'u' || c == 'U') {
+							System.out.println(">UP");
+						} else {
+							System.out.println(">DOWN");
+						}
+					}
+					printPuzzle(solution.getStates().get(i));
 				}
 			}
+			System.out.println();
+			System.out.print("Solution: ");
+			for (int i = 0; i < solution.getPath().size(); i++) {
+				System.out.print(solution.getPath().get(i) + " ");
+			}
+			System.out.println();
+			System.out.printf("Total Time: %.3f sec\n", (end_time - start_time) * 0.001);
+			System.out.println("Nodes Created: " + solution.getNodesCrated() + " nodes");
 		}
-		return true;
 	}
 
 	public static void main(String[] args) {
-		long maxBytes = Runtime.getRuntime().maxMemory();
-		System.out.println("Max memory: " + maxBytes / 1024 / 1024 + " MB");
-		String filenames[] = { ".\\puzzles\\SOK_EASY1.txt", ".\\puzzles\\SOK_EASY2.txt", ".\\puzzles\\SOK_EASY3.txt",
-				".\\puzzles\\SOK_MED1.txt", ".\\puzzles\\SOK_HARD1.txt" };
-		ArrayList<Character[][]> puzzles = new ArrayList<>();
-		for (String filename : filenames) {
-			puzzles.add(loadPuzzle(filename));
+		// Uncomment this if you wan to test some examples.
+		// autoTesting();
+		System.out.println("Hello, This is the A* Sokoban Solver");
+		System.out.println("Please give me a filename of a Sokoban puzzle: ");
+		scan = new Scanner(System.in);
+		String filename = scan.next();
+		Character[][] puzzle = null;
+		try {
+			File file = new File(filename);
+			Scanner sc = new Scanner(file);
+			puzzle = loadPuzzle(sc);
+			sc.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("Wrong input files.");
+			System.exit(0);
 		}
-		for (Character[][] puzzle : puzzles) {
-			// Create a PriorityQueue
-			PriorityQueue<State> frontier = new PriorityQueue<>();
-			ArrayList<Character[][]> visited = new ArrayList<>();
-			frontier.add(new State(' ', puzzle, null));
+		System.out.println("Input Puzzle: ");
+		printPuzzle(puzzle);
+		System.out.println();
 
-			ArrayList<Character> path = AStarSolver(frontier, visited);
-			for (int i = 0; i < path.size(); i++) {
-				System.out.print(path.get(i));
+		// Create an A* solver object.
+		AStarSokobanSolver solution = new AStarSokobanSolver(puzzle);
+
+		long start_time = System.currentTimeMillis();
+		solution.solve();
+		long end_time = System.currentTimeMillis();
+
+		if (solution.getPath() == null) {
+			System.out.println("No solution found");
+		} else {
+			System.out.println("Steps: ");
+			for (int i = 0; i <= solution.getPath().size(); i++) {
+				if (i == solution.getPath().size()) {
+					System.out.println(">GOAL");
+				} else {
+					char c = solution.getPath().get(i);
+					if (c == 'r' || c == 'R') {
+						System.out.println(">RIGHT");
+					} else if (c == 'l' || c == 'L') {
+						System.out.println(">LEFT");
+					} else if (c == 'u' || c == 'U') {
+						System.out.println(">UP");
+					} else {
+						System.out.println(">DOWN");
+					}
+				}
+				printPuzzle(solution.getStates().get(i));
 			}
-			System.out.println();
-			// System.out.println(path);
 		}
+		System.out.println();
+		System.out.print("Solution: ");
+		for (int i = 0; i < solution.getPath().size(); i++) {
+			System.out.print(solution.getPath().get(i) + " ");
+		}
+		System.out.println();
+		System.out.printf("Total Time: %.3f sec\n", (end_time - start_time) * 0.001);
+		System.out.println("Nodes Created: " + solution.getNodesCrated() + " nodes");
 	}
 
 }
