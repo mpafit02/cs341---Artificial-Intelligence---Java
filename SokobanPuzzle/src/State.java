@@ -34,7 +34,7 @@ public class State implements Comparable<State> {
 	 * @param puzzle
 	 * @param parent
 	 */
-	public State(char move, Character[][] puzzle, State parent) {
+	public State(char move, Character[][] puzzle, State parent, int heuristic) {
 		this.children = new ArrayList<>();
 		this.parent = parent;
 		this.move = move;
@@ -53,8 +53,11 @@ public class State implements Comparable<State> {
 				this.puzzle[i][j] = puzzle[i][j];
 			}
 		}
-		this.dist = getDist1(puzzle);
-		// this.dist = getDist2(puzzle);
+		if (heuristic == 1) {
+			this.dist = getDist1(puzzle);
+		} else {
+			this.dist = getDist2(puzzle);
+		}
 	}
 
 	/**
@@ -159,7 +162,7 @@ public class State implements Comparable<State> {
 	 * This method creates all the children of the current state. Before adding a
 	 * child in the children list it checks wether we have a deadlock or not.
 	 */
-	public void createChildren() {
+	public void createChildren(int heuristic) {
 		if (this.children.isEmpty()) {
 			int[] player = playersPosition();
 			int x = player[0];
@@ -170,13 +173,13 @@ public class State implements Comparable<State> {
 				Character[][] puzzle_l = copyArray(puzzle);
 				pushBox(x, y, x, y - 1, x, y - 2, puzzle_l);
 				if (!isDeadlock(puzzle_l)) {
-					this.children.add(new State('L', puzzle_l, this));
+					this.children.add(new State('L', puzzle_l, this, heuristic));
 				}
 			} else if (puzzle[x][y - 1] == ' ' || puzzle[x][y - 1] == '.') {
 				Character[][] puzzle_l = copyArray(puzzle);
 				movePlayer(x, y, x, y - 1, puzzle_l);
 				if (!isDeadlock(puzzle_l)) {
-					this.children.add(new State('l', puzzle_l, this));
+					this.children.add(new State('l', puzzle_l, this, heuristic));
 				}
 			}
 			// Right
@@ -185,13 +188,13 @@ public class State implements Comparable<State> {
 				Character[][] puzzle_r = copyArray(puzzle);
 				pushBox(x, y, x, y + 1, x, y + 2, puzzle_r);
 				if (!isDeadlock(puzzle_r)) {
-					this.children.add(new State('R', puzzle_r, this));
+					this.children.add(new State('R', puzzle_r, this, heuristic));
 				}
 			} else if (puzzle[x][y + 1] == ' ' || puzzle[x][y + 1] == '.') {
 				Character[][] puzzle_r = copyArray(puzzle);
 				movePlayer(x, y, x, y + 1, puzzle_r);
 				if (!isDeadlock(puzzle_r)) {
-					this.children.add(new State('r', puzzle_r, this));
+					this.children.add(new State('r', puzzle_r, this, heuristic));
 				}
 			}
 			// Up
@@ -200,13 +203,13 @@ public class State implements Comparable<State> {
 				Character[][] puzzle_u = copyArray(puzzle);
 				pushBox(x, y, x - 1, y, x - 2, y, puzzle_u);
 				if (!isDeadlock(puzzle_u)) {
-					this.children.add(new State('U', puzzle_u, this));
+					this.children.add(new State('U', puzzle_u, this, heuristic));
 				}
 			} else if (puzzle[x - 1][y] == ' ' || puzzle[x - 1][y] == '.') {
 				Character[][] puzzle_u = copyArray(puzzle);
 				movePlayer(x, y, x - 1, y, puzzle_u);
 				if (!isDeadlock(puzzle_u)) {
-					this.children.add(new State('u', puzzle_u, this));
+					this.children.add(new State('u', puzzle_u, this, heuristic));
 				}
 			}
 			// Down
@@ -215,13 +218,13 @@ public class State implements Comparable<State> {
 				Character[][] puzzle_d = copyArray(puzzle);
 				pushBox(x, y, x + 1, y, x + 2, y, puzzle_d);
 				if (!isDeadlock(puzzle_d)) {
-					this.children.add(new State('D', puzzle_d, this));
+					this.children.add(new State('D', puzzle_d, this, heuristic));
 				}
 			} else if (puzzle[x + 1][y] == ' ' || puzzle[x + 1][y] == '.') {
 				Character[][] puzzle_d = copyArray(puzzle);
 				movePlayer(x, y, x + 1, y, puzzle_d);
 				if (!isDeadlock(puzzle_d)) {
-					this.children.add(new State('d', puzzle_d, this));
+					this.children.add(new State('d', puzzle_d, this, heuristic));
 				}
 			}
 		}

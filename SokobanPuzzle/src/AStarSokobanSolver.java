@@ -19,6 +19,7 @@ public class AStarSokobanSolver {
 	private ArrayList<Character[][]> states;
 	private ArrayList<Character> path;
 	private int nodesCreated;
+	private int heuristic;
 
 	/**
 	 * Constructor for creating a new A* Sokoban solver. It creates the list for
@@ -26,12 +27,13 @@ public class AStarSokobanSolver {
 	 * 
 	 * @param puzzle
 	 */
-	public AStarSokobanSolver(Character[][] puzzle) {
+	public AStarSokobanSolver(Character[][] puzzle, int heuristic) {
 		// Create a PriorityQueue
 		frontier = new PriorityQueue<>();
 		visited = new ArrayList<>();
 		states = new ArrayList<>();
-		frontier.add(new State(' ', puzzle, null));
+		this.heuristic = heuristic;
+		frontier.add(new State(' ', puzzle, null, heuristic));
 		nodesCreated = 0;
 	}
 
@@ -40,7 +42,7 @@ public class AStarSokobanSolver {
 	 * the path list which is the path for the solution.
 	 */
 	public void solve() {
-		State goal = AStarSolver(frontier, visited);
+		State goal = AStarSolver(frontier, visited, heuristic);
 		if (goal != null) {
 			this.path = goal.path;
 			addToStates(states, goal);
@@ -66,7 +68,7 @@ public class AStarSokobanSolver {
 	 * @param visited
 	 * @return
 	 */
-	private State AStarSolver(PriorityQueue<State> frontier, ArrayList<Character[][]> visited) {
+	private State AStarSolver(PriorityQueue<State> frontier, ArrayList<Character[][]> visited,int heuristic) {
 		if (frontier.isEmpty()) {
 			return null;
 		}
@@ -77,7 +79,7 @@ public class AStarSokobanSolver {
 			return parent;
 		}
 		visited.add(parent.puzzle);
-		parent.createChildren();
+		parent.createChildren(heuristic);
 		boolean isVisited = false;
 		for (int i = 0; i < parent.children.size(); i++) {
 			isVisited = false;
@@ -92,7 +94,7 @@ public class AStarSokobanSolver {
 				frontier.add(child);
 			}
 		}
-		return AStarSolver(frontier, visited);
+		return AStarSolver(frontier, visited,heuristic);
 	}
 
 	/**

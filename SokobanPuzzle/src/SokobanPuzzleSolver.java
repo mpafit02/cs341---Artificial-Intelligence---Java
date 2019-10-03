@@ -6,6 +6,16 @@ import java.util.Scanner;
 /**
  * This is a testing main class for the A* Sokoban puzzle solver.
  * 
+ * 
+ * Example of execution:
+ * 
+ * Hello, This is the A* Sokoban Solver
+ * 
+ * Filename of a Sokoban puzzle: .\puzzles\SOK_MED1.txt
+ * 
+ * Heuristic Method (1 or 2): 2
+ * 
+ * 
  * @author Marios
  *
  */
@@ -98,6 +108,14 @@ public class SokobanPuzzleSolver {
 				System.exit(0);
 			}
 		}
+		System.out.print("Heuristic Method (1 or 2): ");
+		scan = new Scanner(System.in);
+		int heuristic = scan.nextInt();
+		while (heuristic != 1 && heuristic != 2) {
+			System.out.println("Wrong input number for heuristic. Please give number 1 or 2");
+			System.out.print("Heuristic Method (1 or 2): ");
+			heuristic = scan.nextInt();
+		}
 		// Solve the puzzles
 		for (Character[][] puzzle : puzzles) {
 			System.out.println("Input Puzzle: ");
@@ -105,7 +123,7 @@ public class SokobanPuzzleSolver {
 			System.out.println();
 
 			// Create an A* solver object.
-			AStarSokobanSolver solution = new AStarSokobanSolver(puzzle);
+			AStarSokobanSolver solution = new AStarSokobanSolver(puzzle, heuristic);
 
 			long start_time = System.currentTimeMillis();
 			solution.solve();
@@ -132,11 +150,11 @@ public class SokobanPuzzleSolver {
 					}
 					printPuzzle(solution.getStates().get(i));
 				}
-			}
-			System.out.println();
-			System.out.print("Solution: ");
-			for (int i = 0; i < solution.getPath().size(); i++) {
-				System.out.print(solution.getPath().get(i) + " ");
+				System.out.println();
+				System.out.print("Solution: ");
+				for (int i = 0; i < solution.getPath().size(); i++) {
+					System.out.print(solution.getPath().get(i) + " ");
+				}
 			}
 			System.out.println();
 			System.out.printf("Total Time: %.3f sec\n", (end_time - start_time) * 0.001);
@@ -148,9 +166,17 @@ public class SokobanPuzzleSolver {
 		// Uncomment this if you wan to test some examples.
 		// autoTesting();
 		System.out.println("Hello, This is the A* Sokoban Solver");
-		System.out.println("Please give me a filename of a Sokoban puzzle: ");
+		System.out.print("Filename of a Sokoban puzzle: ");
 		scan = new Scanner(System.in);
 		String filename = scan.next();
+		System.out.print("Heuristic Method (1 or 2): ");
+		int heuristic = scan.nextInt();
+		while (heuristic != 1 && heuristic != 2) {
+			System.out.println("Wrong input number for heuristic. Please give number 1 or 2");
+			System.out.print("Heuristic Method (1 or 2): ");
+			heuristic = scan.nextInt();
+		}
+		scan.close();
 		Character[][] puzzle = null;
 		try {
 			File file = new File(filename);
@@ -166,7 +192,7 @@ public class SokobanPuzzleSolver {
 		System.out.println();
 
 		// Create an A* solver object.
-		AStarSokobanSolver solution = new AStarSokobanSolver(puzzle);
+		AStarSokobanSolver solution = new AStarSokobanSolver(puzzle, heuristic);
 
 		long start_time = System.currentTimeMillis();
 		solution.solve();
@@ -193,11 +219,11 @@ public class SokobanPuzzleSolver {
 				}
 				printPuzzle(solution.getStates().get(i));
 			}
-		}
-		System.out.println();
-		System.out.print("Solution: ");
-		for (int i = 0; i < solution.getPath().size(); i++) {
-			System.out.print(solution.getPath().get(i) + " ");
+			System.out.println();
+			System.out.print("Solution: ");
+			for (int i = 0; i < solution.getPath().size(); i++) {
+				System.out.print(solution.getPath().get(i) + " ");
+			}
 		}
 		System.out.println();
 		System.out.printf("Total Time: %.3f sec\n", (end_time - start_time) * 0.001);
