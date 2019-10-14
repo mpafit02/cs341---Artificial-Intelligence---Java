@@ -44,4 +44,4 @@ respectively but also, that the player pushed a box on that direction.
 Note: This algorithm has its limitations. Even finding the optimal heuristic at some puzzles with higher difficulty than the one 
 tested is going to run out of memory and throw a StackOverflowError.  
 
-Author: Marios Pafitis
+Author: Marios Pafitis (mpafit02)
