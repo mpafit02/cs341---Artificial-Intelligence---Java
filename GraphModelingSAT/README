@@ -1,0 +1,70 @@
+Author:
+
+Marios Pafitis
+
+Description:
+
+This algorithm takes as input a weighted graph with positive, negative or neutral edges and splits
+the nodes to three (3) different lists based on the conditions:
+
+1. If two nodes are connected with a positive edge they should be in the same list
+2. If two nodes are connected with a negative edge they should be in different lists
+3. If two nodes are connected with a neutral edge we don't care.
+
+Note: No list should be empty.
+
+=======================================================================================================
+
+Run:
+
+In order to run the program you should be in a linux environment because the algorithm uses the 
+Lingeling solver.
+
+There are two modes to run the program.
+
+1. Give '0' as argument to the program and it will ask you to give the path o a text file containing
+a graph with the following format.
+
+4
+0.5
+0.5
+0.5
+0 1 1 0
+1 0 0 1
+1 0 0 0
+0 1 0 0
+
+0 + - 0
++ 0 0 -
+- 0 0 0
+0 - 0 0
+
+The 4 represents the number of nodes.
+The 0.5 the percentage of negative edges.
+THe 0.5 the percentage of positive edges.
+The 0.5 the density of the graph.
+ 
+Then the graph it follows were '1' represents an edge between two nodes.
+
+And finally, the signs for the edges were '+' represents positive, '-' represents the negative and '0' represents the neutral.
+
+
+2. Give '1' as argument to the program and it is goign to generate a random graph. 
+
+It is going to ask you for the number of nodes, negative percentage, positive percentage and the density of the graph to randomly generate it and solve it.
+
+
+=======================================================================================================
+
+Output:
+
+If there is no solution it is going to print you the appropriate message.
+
+If for the certain graph there is a solution it is going to print you the output:
+
+Set 1 = {1, 2}
+Set 2 = {4}
+Set 3 = {3}
+
+Which means node 1 and node 2 should be in the first list, node 4 in the second list and node 3 in the third list. 
+
