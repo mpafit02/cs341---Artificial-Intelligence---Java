@@ -37,14 +37,8 @@ def decisionTreeClassifier(X_train, X_test, y_train, y_test):
     clf = tree.DecisionTreeClassifier()
     clf = clf.fit(X_train, y_train)
 
-    # The prediction set
-    y_pred = []
-    i = 0
-    # For all the input tests
-    while i < len(X_test):
-        # Predict what is it and add it to the prediction set
-        y_pred.append(clf.predict([X_test[i]])[0])
-        i += 1
+    # Create the prediction set
+    y_pred = list(clf.predict(X_test))
 
     print("Classification Report:")
     print(classification_report(y_test, y_pred))
@@ -58,14 +52,8 @@ def mlpClassifier(X_train, X_test, y_train, y_test):
     clf = MLPClassifier()
     clf.fit(X_train, y_train)
 
-    # The prediction set
-    y_pred = []
-    i = 0
-    # For all the input tests
-    while i < len(X_test):
-        # Predict what is it and add it to the prediction set
-        y_pred.append(clf.predict([X_test[i]])[0])
-        i += 1
+    # Create the prediction set
+    y_pred = list(clf.predict(X_test))
 
     print("Classification Report:")
     print(classification_report(y_test, y_pred))
