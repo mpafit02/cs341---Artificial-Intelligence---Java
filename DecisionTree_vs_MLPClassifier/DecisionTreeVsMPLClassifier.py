@@ -49,7 +49,7 @@ def decisionTreeClassifier(X_train, X_test, y_train, y_test):
 def mlpClassifier(X_train, X_test, y_train, y_test):
     print("\n\nMultilayer Perceptron Classifier")
     print("=============================================================\n")
-    clf = MLPClassifier()
+    clf = MLPClassifier(max_iter=1000)
     clf.fit(X_train, y_train)
 
     # Create the prediction set
